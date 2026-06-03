@@ -118,7 +118,7 @@ See [docs/data_format.md](docs/data_format.md) for details.
 Checkpoint files are kept locally under `checkpoints/` and ignored by git. The trained weight is available at [checkpoints](https://drive.google.com/drive/folders/1F9rZokUZS34ctuWBuaUmGgnL9_6KSPKN?usp=drive_link). See [docs/checkpoints.md](docs/checkpoints.md).
 
 ## Citation
-Please cite our paper if you find it useful. Feel free to contact r.su@tue.nl with questions or for collaboration.
+Please cite our paper if you find it useful.
 
 ```bibtex
 @article{stroketimer2026,
@@ -129,10 +129,7 @@ Please cite our paper if you find it useful. Feel free to contact r.su@tue.nl wi
 }
 ```
 
-## Notes
-
-This repository is intended for academic research. It does not include raw or processed patient imaging data.
-
 ## Contact
+Feel free to contact us with questions or for collaboration.
 - Name: Ruisheng Su
 - Email: r.su@tue.nl
