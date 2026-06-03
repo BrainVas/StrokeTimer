@@ -1,0 +1,144 @@
+# ===== Dataset =====
+ncct:
+  csv_path: "data/meta_with_phase_center_stratified_balanced.csv"
+  split_ratios: [0.7, 0.15, 0.15]   # kept for compatibility; phase column in CSV has higher priority
+  zscore: true
+  fix_depth: true
+  seed: 42
+  balance_eval: false
+
+# ===== Scheduler & training =====
+shift: false
+coslr: false
+coslrwarmup: true
+warmup_epochs: 10
+base_lr: 0.0003
+warmup_lr: 0.0001
+endlr: 0.000001
+last: false
+
+# ===== Losses =====
+criterions:
+  FeatureLoss:            # Stage-2 CMS on contrastive features (energy-guided)
+    def_file: stroketimer/losses/cms_energy_guided.py
+    loss_params:
+      feat_dim: 128          # contrastive dim, must match projector output
+      k: 20
+      tau_ms: 0.2
+      tau_nce: 0.07
+      use_queue: true
+      queue_size: 67840
+      num_classes: 3
+      class_freq_json: configs/ncct_class_frequency.json
+      freq_gamma: 0.2
+      logit_adjust_beta: 1.0
+    optim_params: null
+    weight: 0.5
+
+  PerformanceLoss:        # Stage-3 Balanced Softmax classification
+    def_file: stroketimer/losses/balanced_softmax_loss.py
+    loss_params:
+      class_counts: configs/ncct_class_frequency.json
+      temperature: 1.0
+      min_count: 1e-6
+      normalize_counts: false
+    optim_params: null
+    weight: 1.0
+
+memory:
+  centroids: false
+  init_centroids: false
+
+# ===== Networks =====
+networks:
+  feat_model:
+    def_file: stroketimer/models/resnext3d_cms.py
+    fix: false
+    optim_params: { lr: 0.0003, momentum: 0.9, weight_decay: 0.0003 }
+    params:
+      in_channels: 1
+      feat_dim: 256         # semantic dim (head_s)
+      z_dim: 128
+      con_dim: 128           # projector output dim
+      use_bn_head: true
+      base_width: 4
+      cardinality: 32
+      stage2_classifier_only: false
+
+      # Decoder knobs
+      decoder_out_scale: 0.5
+      decoder_amp: true
+      decoder_mode: trilinear
+
+  classifier:
+    def_file: stroketimer/models/cosine_classifier.py
+    optim_params: { lr: 0.0003, momentum: 0.9, weight_decay: 0.0003 }
+    params:
+      feat_dim: 256
+      num_classes: 3
+      scale: 30.0
+      learnable_scale: true
+
+# ===== Data & runtime =====
+shuffle: true
+
+training_opt:
+  dataset: ncct_dataset
+  data_root: "data/center_data"
+  log_dir: "outputs/stroketimer_best"
+  num_classes: 3
+  feature_dim: 256
+  batch_size: 8
+  num_workers: 16
+  display_step: 10
+  open_threshold: 0.1
+  num_epochs: 160
+  scheduler_params: { gamma: 0.1, step_size: 3 }
+
+  sampler: null
+
+  # Stage-1 losses
+  lambda_rec: 1.0
+  lambda_kl: 0.1
+  lambda_zrec: 1.0
+  lambda_ortho: 0.05
+
+  # Stage-2/3 gates
+  lambda_proto: 0.5
+  lambda_ce: 1.0
+
+  # Stage control
+  disent_epochs: 80
+  proto_start: 81
+  cls_start: 140
+  freeze_encoder_at_cls: true
+
+  # CE ramp
+  ce_ramp: 40
+  ce_end_weight: 1.0
+
+  # Stage-wise LR multipliers
+  stage1_lr_mult: 1.0
+  stage2_lr_mult: 0.05
+  stage3_lr_mult: 0.02
+
+  # Runner-level regex freeze
+  freeze_low_layers_at_proto: true
+  disable_disent_after_proto: true
+  proto_freeze_regex:
+    - '^backbone\.layer1\.'
+    - '^backbone\.layer2\.'
+    - '^backbone\.layer3\.'
+    - '^decoder\.'
+    - '^modenc\.'
+    - '^s_reducer\.'
+  proto_unfreeze_regex:
+    #- '^backbone\.layer3\.'
+    - '^backbone\.layer4\.'
+    - '^neck_reduce\.'
+    - '^cb_block\.'
+    - '^rb_block\.'
+    - '^avgpool\.'
+    - '^head_s\.'
+
+model_dir: null

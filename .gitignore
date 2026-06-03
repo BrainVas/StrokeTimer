@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Environments
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Outputs
+outputs/
+logs/
+wandb/
+*.out
+*.err
+
+# Local medical data and metadata
+data/**/*.csv
+data/**/*.xls
+data/**/*.xlsx
+data/**/*.npy
+data/**/*.npz
+data/**/*.nii
+data/**/*.nii.gz
+*.nii
+*.nii.gz
+raw_data/
+**/raw_data/
+*.dcm
+*.zip
+
+# Local model artifacts
+checkpoints/**/*.pth
+checkpoints/**/*.pt
+checkpoints/**/*.ckpt
+checkpoints/**/*.h5
+*.pth
+*.pt
+*.ckpt
+*.h5
+
+# CT_BET local runtime artifacts
+stroketimer/preprocessing/CT_BET/image_data/*
+stroketimer/preprocessing/CT_BET/mask_data/*
+stroketimer/preprocessing/CT_BET/results_folder/*
+!stroketimer/preprocessing/CT_BET/image_data/.gitkeep
+!stroketimer/preprocessing/CT_BET/mask_data/.gitkeep
+!stroketimer/preprocessing/CT_BET/results_folder/.gitkeep
+!stroketimer/preprocessing/CT_BET/weights_folder/weight_file
+
+# OS files
+Thumbs.db
+.DS_Store
