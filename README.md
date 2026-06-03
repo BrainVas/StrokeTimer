@@ -132,3 +132,7 @@ Please cite our paper if you find it useful. Feel free to contact r.su@tue.nl wi
 ## Notes
 
 This repository is intended for academic research. It does not include raw or processed patient imaging data.
+
+## Contact
+Name: Ruisheng Su
+Email: r.su@tue.nl
